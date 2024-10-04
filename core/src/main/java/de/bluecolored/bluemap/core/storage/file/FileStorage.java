@@ -36,14 +36,14 @@ import java.util.stream.Stream;
 
 public class FileStorage implements Storage {
 
-    private final Path root;
+    private final IFileConfig config;
     private final LoadingCache<String, FileMapStorage> mapStorages;
 
-    public FileStorage(Path root, Compression compression, boolean atomic) {
-        this.root = root;
+    public FileStorage(IFileConfig config, Compression compression, boolean atomic) {
+        this.config = config;
 
         mapStorages = Caffeine.newBuilder()
-                .build(id -> new FileMapStorage(root.resolve(id), compression, atomic));
+                .build(id -> new FileMapStorage(config.getRoot().resolve(id), compression, atomic));
     }
 
     @Override
@@ -57,7 +57,7 @@ public class FileStorage implements Storage {
     @SuppressWarnings("resource")
     @Override
     public Stream<String> mapIds() throws IOException {
-        return Files.list(root)
+        return Files.list(config.getRoot())
                 .filter(Files::isDirectory)
                 .map(Path::getFileName)
                 .map(Path::toString);
